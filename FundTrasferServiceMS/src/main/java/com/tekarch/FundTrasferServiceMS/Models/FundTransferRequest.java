@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 @Entity
 @Table(name = "info")
@@ -19,7 +20,10 @@ public class FundTransferRequest {
     private String toAccountId;
 
     @NotNull
-    private BigDecimal amount;
+    private Long amount;
+    private String frequency; // e.g., daily, weekly, monthly
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     private String description;
 

@@ -3,9 +3,8 @@ package com.tekarch.FundTrasferServiceMS.Models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,7 +13,7 @@ import java.util.List;
 @Data
 public class FundTransferResponse {
 
-    public FundTransferResponse(Long transferId, String status, LocalDateTime initiatedAt) {
+    public FundTransferResponse() {
         this.transferId = transferId;
         this.status = status;
         this.initiatedAt = initiatedAt;
@@ -24,7 +23,19 @@ public class FundTransferResponse {
     private String fromAccountId;
     private Long transferId;
     private String status;
+    private String toAccountId;
+
+    @NotNull
+    private Long amount;
     private LocalDateTime initiatedAt;
+    private boolean valid;
+    private String scheduleId;
+    private String frequency;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String description;
+
+    private String message;
 
 
     @OneToMany(mappedBy = "fundTransferResponse")
