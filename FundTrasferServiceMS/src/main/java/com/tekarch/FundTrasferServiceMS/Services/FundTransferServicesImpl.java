@@ -1,6 +1,7 @@
 package com.tekarch.FundTrasferServiceMS.Services;
 
-import com.tekarch.FundTrasferServiceMS.Models.FundTransferRequest;
+import com.tekarch.FundTrasferServiceMS.DTO.AccountDTO;
+//import com.tekarch.FundTrasferServiceMS.Models.FundTransferRequest;
 import com.tekarch.FundTrasferServiceMS.Models.FundTransferResponse;
 import com.tekarch.FundTrasferServiceMS.Models.RemainingResponseDTO;
 import com.tekarch.FundTrasferServiceMS.Repository.FundTransferRepository;
@@ -18,78 +19,80 @@ import java.util.UUID;
 @Service
 public class FundTransferServicesImpl implements FundTransferService {
 
+
+    @Autowired
+    private FundTransferRepository fundTransferRepository;
+   // private final Map<String, FundTransferResponse> transfers = new HashMap<>();
     @Autowired
     private RestTemplate restTemplate;
-    @Value("${account.service.url}")
-    private static String Account_URL;
 
-    @Autowired
-    private final FundTransferRepository fundTransferRepository;
-    private final Map<String, FundTransferResponse> transfers = new HashMap<>();
+    String Account_URL="http://localhost:8083/account";
 
-    public FundTransferServicesImpl(FundTransferRepository fundTransferRepository) {
-        this.fundTransferRepository = fundTransferRepository;
-    }
+@Override
+    public FundTransferResponse initiateTransfer(FundTransferResponse transferRequest) {
+        AccountDTO receiverAccount = restTemplate.getForObject(Account_URL + "/" + transferRequest.getFromaccountId(),
+                    AccountDTO.class);
 
+        AccountDTO senderAccount = restTemplate.getForObject(Account_URL + "/" + transferRequest.getToaccountId(),
+                AccountDTO.class);
+    if(receiverAccount.getAccountNumber() == null || senderAccount.getAccountNumber() == null){
+                throw new RuntimeException("Invalid Account");
+            }
 
-    public FundTransferResponse initiateTransfer(FundTransferRequest transferRequest) {
+            receiverAccount.setBalance(receiverAccount.getBalance() + transferRequest.getAmount());
+            senderAccount.setBalance(senderAccount.getBalance() - transferRequest.getAmount());
 
+            restTemplate.put(Account_URL, senderAccount);
+            restTemplate.put(Account_URL, receiverAccount);
 
-        UUID uuid = UUID.randomUUID();
-        Long transferId = uuid.getMostSignificantBits();
-        String status = "initiated";
-        LocalDateTime initiatedAt = LocalDateTime.now();
+            return fundTransferRepository.save(transferRequest);
+        }
 
-        System.out.println("Initiating transfer from " + transferRequest.getFromAccountId() +
-                " to " + transferRequest.getToAccountId() + " amount: " + transferRequest.getAmount());
-        return new FundTransferResponse();
-       /* FundTransferResponse transferResponse = new FundTransferResponse(transferId, status, initiatedAt);
-        transfers.put(transferId, transferResponse);
-
-        // Return the transfer response
-        return transferResponse;*/
-    }
+@Override
     public Optional<FundTransferResponse> getTransferStatus(Long transferId) {
 return fundTransferRepository.findById(transferId);
 
     }
 
     // Get all transfers (for listing purposes)
+    @Override
     public   Iterable<FundTransferResponse> getAllTransfers() {
         return fundTransferRepository.findAll();
     }
+    /*@Override
     public FundTransferResponse validateTransactionLimit(String accountId, FundTransferRequest requestDTO) {
         String url = String.format("%s/accounts/%s/limits/validate-transaction?amount=%f", Account_URL, accountId, requestDTO.getAmount());
         return restTemplate.getForObject(url, FundTransferResponse.class);
-    }
-
+    }*/
+    @Override
     public RemainingResponseDTO getRemainingLimits(String accountId) {
         String url = String.format("%s/accounts/%s/transaction-limits", Account_URL, accountId);
         return restTemplate.getForObject(url, RemainingResponseDTO.class);
     }
+  /*  @Override
     public FundTransferResponse createScheduledTransfer(FundTransferResponse requestDTO) {
         String scheduleId = UUID.randomUUID().toString();
         FundTransferResponse responseDTO = new FundTransferResponse();
         responseDTO.setScheduleId(scheduleId);
         responseDTO.setStatus("Scheduled");
 
-        responseDTO.setFromAccountId(requestDTO.getFromAccountId());
-        responseDTO.setToAccountId(requestDTO.getToAccountId());
+        responseDTO.setFromaccountId(requestDTO.getFromaccountId());
+        responseDTO.setToaccountId(requestDTO.getToaccountId());
         responseDTO.setAmount(requestDTO.getAmount());
         responseDTO.setFrequency(requestDTO.getFrequency());
-        responseDTO.setStartDate(requestDTO.getStartDate());
-        responseDTO.setEndDate(requestDTO.getEndDate());
+        //responseDTO.setStartDate(requestDTO.getStartDate());
+        //responseDTO.setEndDate(requestDTO.getEndDate());
         responseDTO.setDescription(requestDTO.getDescription());
 
         // Save the scheduled transfer
         transfers.put(scheduleId, responseDTO);
         return responseDTO;
     }
-    public FundTransferResponse updateScheduledTransfer(String scheduleId, FundTransferRequest requestDTO) {
+  /*  public FundTransferResponse updateScheduledTransfer(String scheduleId, FundTransferResponse requestDTO) {
         FundTransferResponse existingTransfer = transfers.get(scheduleId);
         if (existingTransfer != null) {
             if (requestDTO.getAmount() != 0) existingTransfer.setAmount(requestDTO.getAmount());
-            if (requestDTO.getEndDate() != null) existingTransfer.setEndDate(requestDTO.getEndDate());
+            if (requestDTO.getEndDate() != null) existingTransfer.setcompleted_at(requestDTO.getEndDate());
             if (requestDTO.getDescription() != null) existingTransfer.setDescription(requestDTO.getDescription());
             return existingTransfer;
         }
@@ -97,11 +100,13 @@ return fundTransferRepository.findById(transferId);
     }
 
     // Get details of a scheduled transfer
+    @Override
     public FundTransferResponse getScheduledTransfer(String scheduleId) {
         return transfers.get(scheduleId);
     }
 
     // Cancel a scheduled transfer
+    @Override
     public FundTransferResponse cancelScheduledTransfer(String scheduleId) {
         FundTransferResponse transfer = transfers.remove(scheduleId);
         if (transfer != null) {
@@ -109,5 +114,5 @@ return fundTransferRepository.findById(transferId);
             return transfer;
         }
         return null; // Scheduled transfer not found
-    }
+    }*/
 }

@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class RemainingResponseDTO {
 
-    private String fromAccountId;
+    private Long fromaccountId;
     private double dailyLimitRemaining;
     private double weeklyLimitRemaining;
     private double monthlyLimitRemaining;

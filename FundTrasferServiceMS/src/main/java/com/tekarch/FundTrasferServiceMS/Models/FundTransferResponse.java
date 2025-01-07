@@ -3,42 +3,42 @@ package com.tekarch.FundTrasferServiceMS.Models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "info")
+@Table(name = "fundservice")
 @Data
 public class FundTransferResponse {
 
-    public FundTransferResponse() {
-        this.transferId = transferId;
-        this.status = status;
-        this.initiatedAt = initiatedAt;
-    }
     @Id
-    @NotNull
-    private String fromAccountId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long transferId;
-    private String status;
-    private String toAccountId;
-
     @NotNull
-    private Long amount;
-    private LocalDateTime initiatedAt;
-    private boolean valid;
-    private String scheduleId;
-    private String frequency;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private String description;
+    private Long fromaccountId;
+    @NotNull
+    private  Long toaccountId;
+    @NotNull
+    private Double amount;
+    private String status;
+    @CreationTimestamp
+    private LocalDateTime initiated_at;
+    @UpdateTimestamp
+    private LocalDateTime completed_at;
 
-    private String message;
+   // private String scheduleId;
+   // private String frequency;
+
+   // private String description;
+
+   // private String message;
 
 
-    @OneToMany(mappedBy = "fundTransferResponse")
-    private List<FundTransferRequest> fundTransferRequest;
+   /* @OneToMany(mappedBy = "fundTransferResponse")
+    private List<FundTransferRequest> fundTransferRequest;*/
 
 }
