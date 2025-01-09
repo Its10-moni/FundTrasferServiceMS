@@ -30,15 +30,23 @@ public class FundTransferResponse {
     @UpdateTimestamp
     private LocalDateTime completed_at;
 
-   // private String scheduleId;
-   // private String frequency;
+    private String scheduleId;
+    private String frequency;
+    private String description;
+    @CreationTimestamp
+    private LocalDate startDate;
+    @UpdateTimestamp
+    private LocalDate endDate;
 
-   // private String description;
 
-   // private String message;
+    // private String message;
 
 
    /* @OneToMany(mappedBy = "fundTransferResponse")
-    private List<FundTransferRequest> fundTransferRequest;*/
+    private List<FundTransferRequest> fundTransferRequest;
+
+     private double dailyLimitRemaining;
+    private double weeklyLimitRemaining;
+    private double monthlyLimitRemaining;*/
 
 }
